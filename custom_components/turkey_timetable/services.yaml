@@ -1,0 +1,32 @@
+update_schedule:
+  name: Update schedule
+  description: >
+    Replaces the stored timetable with the given lessons and settings.
+    Called by the turkey-timetable-card whenever the user saves a change,
+    so the calendar entity and lesson sensors stay in sync with what's
+    shown in the card.
+  fields:
+    lessons:
+      name: Lessons
+      description: Full list of lessons (each with id, day, start_time, end_time, subject, tutor, color, etc).
+      required: true
+      selector:
+        object:
+    settings:
+      name: Settings
+      description: Timetable settings (notifications_enabled, notification_lead_minutes).
+      required: false
+      selector:
+        object:
+
+test_notification:
+  name: Test notification
+  description: >
+    Fires the turkey_timetable_lesson_starting event immediately for
+    whichever lesson is currently "next", ignoring the notify-lead-time
+    setting. Use this from Developer Tools -> Actions to test an automation
+    listening for that event without waiting for a real lesson's lead time
+    to arrive. If nothing happens when you call this, the problem is in
+    your automation (or notify service); if this also does nothing, the
+    problem is upstream - no lessons scheduled, or the integration isn't
+    receiving your schedule from the card.
