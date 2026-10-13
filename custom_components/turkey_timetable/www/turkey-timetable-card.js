@@ -57,6 +57,12 @@ function toMinutes(hhmm) {
   return h * 60 + m;
 }
 
+// A lesson is on unless explicitly toggled off - lessons saved before the
+// toggle existed have no `enabled` field and count as on.
+function isLessonEnabled(lesson) {
+  return lesson.enabled !== false;
+}
+
 function minutesToHHMM(totalMinutes) {
   const wrapped = ((totalMinutes % 1440) + 1440) % 1440; // wrap around midnight
   const h = Math.floor(wrapped / 60);
@@ -563,7 +569,7 @@ class TurkeyTimetableCard extends HTMLElement {
 
   _scheduleSummaryText() {
     const lines = this._data.lessons
-      .slice()
+      .filter(isLessonEnabled)
       .sort((a, b) => {
         const dayDiff = WEEKDAYS.findIndex((d) => d.key === a.day) - WEEKDAYS.findIndex((d) => d.key === b.day);
         return dayDiff !== 0 ? dayDiff : toMinutes(a.start_time) - toMinutes(b.start_time);
@@ -644,6 +650,7 @@ class TurkeyTimetableCard extends HTMLElement {
     let bestOffset = Infinity;
 
     for (const lesson of this._data.lessons) {
+      if (!isLessonEnabled(lesson)) continue;
       const dayIndex = WEEKDAYS.findIndex((d) => d.key === lesson.day);
       if (dayIndex === -1) continue;
       let dayOffset = dayIndex - nowDay;
@@ -755,9 +762,10 @@ class TurkeyTimetableCard extends HTMLElement {
       (lesson.links && lesson.links.length > 0);
     const hasMeta = hasLink || hasExtra;
     const dayShort = showDay ? (WEEKDAYS.find((d) => d.key === lesson.day) || {}).short : null;
+    const enabled = isLessonEnabled(lesson);
     return `
-      <div class="lesson-row" data-id="${lesson.id}">
-        <div class="lesson-swipe-content" style="background:${colorHex(lesson.color)}">
+      <div class="lesson-row${enabled ? "" : " lesson-disabled"}" data-id="${lesson.id}">
+        <div class="lesson-swipe-content" style="background:${enabled ? colorHex(lesson.color) : colorHex("gray")}">
           <div class="lesson-time">${dayShort ? `${dayShort} ` : ""}${lesson.start_time}</div>
           <div class="lesson-title">${this._escape(lesson.subject)}${lesson.tutor ? ` - ${this._escape(lesson.tutor)}` : ""}</div>
           ${
@@ -768,7 +776,7 @@ class TurkeyTimetableCard extends HTMLElement {
                 </div>`
               : ""
           }
-          ${isNext ? `<div class="next-pill">Next</div>` : ""}
+          ${!enabled ? `<div class="next-pill off-pill">Paused</div>` : isNext ? `<div class="next-pill">Next</div>` : ""}
         </div>
         <button class="lesson-delete-btn" title="Delete">${this._icon("trash")}</button>
       </div>
@@ -855,8 +863,9 @@ class TurkeyTimetableCard extends HTMLElement {
 
           <div class="sheet-group">
             <div class="view-title-row">
-              <span class="view-color-dot" style="background:${colorHex(lesson.color)}"></span>
+              <span class="view-color-dot" style="background:${colorHex(isLessonEnabled(lesson) ? lesson.color : "gray")}"></span>
               <span class="view-title">${this._escape(title)}</span>
+              ${isLessonEnabled(lesson) ? "" : `<span class="paused-badge">Paused</span>`}
             </div>
             <button class="row selectable" id="view-filter-subject">
               <span>Subject</span>
@@ -1277,6 +1286,16 @@ class TurkeyTimetableCard extends HTMLElement {
             isNew
               ? ""
               : `<div class="sheet-group">
+                  <div class="row">
+                    <span>Pause Lesson</span>
+                    <label class="switch">
+                      <input type="checkbox" id="pause-lesson-toggle" ${isLessonEnabled(lesson) ? "" : "checked"}>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="view-tap-hint">A paused lesson stays in the timetable, greyed out, but is removed from the calendar and reminders until you resume it.</div>
+                <div class="sheet-group">
                   <button class="row danger-row" id="delete-lesson">Delete Lesson</button>
                 </div>`
           }
@@ -1355,7 +1374,7 @@ class TurkeyTimetableCard extends HTMLElement {
 
   _weeklyOverviewModal() {
     const cache = this._weeklyOverviewCache;
-    const lessons = this._data.lessons;
+    const lessons = this._data.lessons.filter(isLessonEnabled);
     const dayCounts = {};
     lessons.forEach((l) => (dayCounts[l.day] = (dayCounts[l.day] || 0) + 1));
     const busiestDayKey = Object.keys(dayCounts).sort((a, b) => dayCounts[b] - dayCounts[a])[0];
@@ -2023,6 +2042,15 @@ class TurkeyTimetableCard extends HTMLElement {
     const qa = (sel) => Array.from(root.querySelectorAll(sel));
     const lesson = this._modal.lesson;
 
+    // Applied to the form's working copy only - committed with Save,
+    // discarded with Cancel, same as every other field in this sheet.
+    const pauseToggle = q("#pause-lesson-toggle");
+    if (pauseToggle) {
+      pauseToggle.onchange = (e) => {
+        lesson.enabled = !e.target.checked;
+      };
+    }
+
     const quickFillInput = q("#quickfill-input");
     if (quickFillInput) {
       quickFillInput.oninput = (e) => (this._modal.quickFillText = e.target.value);
@@ -2230,6 +2258,7 @@ class TurkeyTimetableCard extends HTMLElement {
       } else {
         this._data.lessons[idx] = lesson;
       }
+      this._weeklyOverviewCache = null; // pausing changes the lesson count
       this._persist();
       this._modal = null;
       this._render();
@@ -3188,6 +3217,25 @@ class TurkeyTimetableCard extends HTMLElement {
       .next-pill {
         background: white;
         color: #1c1c1e;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 999px;
+      }
+      /* Paused lessons: solid grey fill (never translucent - the red
+         swipe-to-delete button sits directly underneath the row) with
+         dimmed content, so they read as clearly "not on" at a glance. */
+      .lesson-disabled .lesson-swipe-content > *:not(.off-pill) {
+        opacity: 0.55;
+      }
+      .off-pill {
+        background: rgba(0,0,0,0.22);
+        color: #fff;
+      }
+      .paused-badge {
+        margin-left: auto;
+        background: rgba(142,142,147,0.22);
+        color: var(--tt-text-dim);
         font-size: 12px;
         font-weight: 700;
         padding: 4px 10px;
