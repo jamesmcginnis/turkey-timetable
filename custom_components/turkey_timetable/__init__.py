@@ -40,6 +40,9 @@ LESSON_SCHEMA = vol.Schema(
         vol.Optional("passcode", default=""): cv.string,
         vol.Optional("notes", default=""): cv.string,
         vol.Optional("location", default=""): cv.string,
+        # False = toggled off in the card: kept in the timetable (greyed
+        # out) but skipped by the calendar, sensors and notifications.
+        vol.Optional("enabled", default=True): cv.boolean,
         vol.Optional("attachments", default=[]): [
             vol.Schema({vol.Required("name"): cv.string, vol.Required("url"): cv.string})
         ],

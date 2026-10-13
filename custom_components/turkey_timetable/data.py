@@ -71,6 +71,11 @@ class TurkeyTimetableData:
             for lesson in self.lessons:
                 if lesson.get("day") != weekday_name:
                     continue
+                # Toggled-off lessons never produce an instance - this one
+                # check covers the calendar, current/next sensors, the
+                # next-reminder sensor and the lesson-starting event.
+                if lesson.get("enabled", True) is False:
+                    continue
 
                 start_time = _parse_hhmm(lesson["start_time"])
                 end_time = _parse_hhmm(lesson["end_time"])
