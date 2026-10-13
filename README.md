@@ -92,6 +92,7 @@ Gemini's free tier is generous for a timetable card. The card caches Lesson Reso
 - 🎨 **Colour-coded lessons** — an iOS Reminders-style palette of 11 colours
 - 🔍 **Search** — filter every lesson by subject or tutor
 - 👈 **Swipe to delete** — iOS swipe-list convention on each lesson row
+- ⏸️ **Pause lessons** — switch on **Pause Lesson** in a lesson's Edit form when it isn't running for a while. It stays in the timetable, greyed out with a Paused label, but drops out of the calendar, sensors and reminders until you resume it
 - 💻 **Online lesson details** — lesson link, meeting ID / username and passcode, each with one-tap copy
 - 📍 **Location and notes** for every lesson
 - 🔗 **Links and online lessons** — attach any number of named links to a lesson
@@ -146,6 +147,8 @@ All optional, and each can be switched off individually in the editor:
 
 > Entity IDs may differ slightly on your system — check **Settings → Devices & Services → Turkey Timetable**.
 
+> ⏸️ **Paused lessons are left out of everything above**, and never fire the `turkey_timetable_lesson_starting` event, so no automations or reminders run for them. They reappear as soon as the lesson is resumed.
+
 ### Actions
 
 | Action | Description |
@@ -199,6 +202,8 @@ triggers:
     offset: "-0:10:00"
     entity_id: calendar.timetable
 ```
+
+> Home Assistant's calendar trigger refreshes its list of upcoming events about every 15 minutes, so pausing a lesson in the few minutes before it starts may not stop this trigger. The event and Next Reminder sensor triggers above update straight away.
 
 ### Lesson in progress
 
@@ -267,6 +272,9 @@ ai_enable_practice_resources: true
 **Notifications don't arrive**
 - Check **Notifications** is switched on in the card's Settings.
 - Run **`turkey_timetable.test_notification`** from **Developer Tools → Actions**. If your automation runs, the setup is fine and you just need to wait for the next reminder. If you get a "No upcoming lesson found" message, add a lesson in the card first.
+
+**A lesson is missing from the calendar, or its reminder doesn't fire**
+- Check the lesson isn't paused — paused lessons show as a grey row with a **Paused** label. Open the lesson, tap **Edit** and switch off **Pause Lesson**.
 
 **AI features are missing, or show "No AI conversation agent is set up"**
 - Check **Enable AI Features** is turned on in the editor's **AI Settings** — AI is off by default, and its menu entries are hidden until it's enabled.

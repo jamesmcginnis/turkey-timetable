@@ -15,6 +15,7 @@ The timetable is **shared across the whole household** — everyone sees the sam
 - **Colour-coded Lessons** — an iOS Reminders-style palette of 11 colours
 - **Search** — filter every lesson by subject or tutor
 - **Swipe to Delete** — iOS swipe-list convention on each lesson row
+- **Pause Lessons** — pause a lesson that isn't running for a while; it stays in the timetable, greyed out, but is left out of the calendar, sensors and reminders until resumed
 - **Online Lesson Details** — lesson link, meeting ID and passcode, each with one-tap copy
 - **Location, Notes, Links and Attachments** — upload files straight from your device
 - **Export to PDF** — List View or Grid View
@@ -47,6 +48,8 @@ Resource links are never AI-generated — they come from a hand-picked list of f
 - **Lesson In Progress** — a binary sensor that's on while a lesson is running
 - **`turkey_timetable_lesson_starting` event** — fired at your chosen reminder time
 - **`turkey_timetable.test_notification` action** — test your automations on demand
+
+Paused lessons are left out of every entity and never fire the lesson-starting event.
 
 ## Installation
 
