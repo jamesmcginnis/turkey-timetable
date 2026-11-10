@@ -1,5 +1,9 @@
 # Turkey Timetable
 
+If you enjoy Turkey Timetable, you can support its development:
+
+[![Buy Me a Coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20Me%20a%20Coffee&emoji=&slug=jamesmcginnis&button_colour=FFDD00&font_colour=000000&font_family=Inter&outline_colour=000000&coffee_colour=ffffff)](https://buymeacoffee.com/jamesmcginnis)
+
 Turkey Timetable is a Home Assistant integration and Lovelace card for keeping track of a weekly lesson timetable. Designed with an **iPhone-style** look and feel, the card gives you a clean, colour-coded week of lessons with tutors, online meeting details, notes, links and attachments — while the integration turns that timetable into real Home Assistant entities: a calendar, current / next lesson sensors, a lesson-in-progress binary sensor and a lesson-starting event you can build notifications and automations around.
 
 The timetable is **shared across the whole household** — it's stored by the integration, not in any one browser or Home Assistant user account, so everyone sees the same lessons on every device.
@@ -100,6 +104,7 @@ Gemini's free tier is generous for a timetable card. The card caches Lesson Reso
 - 📄 **Export to PDF** — in **List View** or **Grid View**
 - 💾 **Data & Backup** — back up to a JSON file, restore (merge or replace), or reset the timetable
 - 🔔 **Notifications** — switch on/off and choose how far ahead to be reminded (1–60 minutes)
+- 👋 **Lesson join notifications** — optionally tell chosen Home Assistant users (via their notify services) when someone taps a lesson's online link
 - 🏠 **Shared by the household** — every user and device sees the same timetable
 
 ### Appearance
@@ -154,6 +159,7 @@ All optional, and each can be switched off individually in the editor:
 | Action | Description |
 |--------|-------------|
 | `turkey_timetable.update_schedule` | Replaces the stored timetable. The card calls this automatically whenever you save a change |
+| `turkey_timetable.notify_join` | Sends the lesson-join message to chosen notify services. The card calls this when someone taps a lesson link |
 | `turkey_timetable.test_notification` | Fires the lesson-starting event immediately for the next lesson — run it from **Developer Tools → Actions** to test an automation without waiting |
 
 ---
@@ -249,6 +255,12 @@ ai_enable_practice_resources: true
 | `switch_color` | `#34c759` | Toggle switches when turned on |
 | `ai_features_enabled` | `false` | Master switch for all AI features |
 | `ai_conversation_agent` | *(Home Assistant)* | Conversation agent used for AI features |
+| `join_notify_enabled` | `false` | Send a message when someone taps a lesson's online link |
+| `join_notify_targets` | `[]` | Notify service names to message, e.g. `mobile_app_pixel` |
+| `join_notify_skip_self` | `true` | Don't message the person who joined |
+| `join_notify_catchup` | `false` | Also message for catchup lesson links |
+| `join_notify_title` | `Lesson joined` | Notification title |
+| `join_notify_message` | `{user} has joined {subject} ({start}-{end})` | Message; also `{tutor}` and `{day}` |
 | `exam_board` | — | `aqa`, `edexcel`, `ocr`, `wjec`, `ccea` or `sqa` |
 | `year_group` | — | `Year 1` to `Year 13` |
 | `ai_enable_ask` | `true` | Ask Your Timetable |
@@ -312,3 +324,9 @@ MIT License — free to use, modify and distribute.
 If this is useful to you, please **star the repository** and share it with the community!
 
 For bugs or feature requests, use the [GitHub Issues](../../issues) page.
+
+---
+
+## 🧑‍💻 Development
+
+The card's readable source lives in `source/turkey-timetable-card.js`. Edit it there, then run `npm install` (once) and `npm run build` inside `source/` to minify it, with `.gz` and `.br` copies, into `custom_components/turkey_timetable/www/`.

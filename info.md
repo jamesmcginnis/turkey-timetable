@@ -1,5 +1,9 @@
 # Turkey Timetable
 
+If you enjoy Turkey Timetable, you can support its development:
+
+[![Buy Me a Coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20Me%20a%20Coffee&emoji=&slug=jamesmcginnis&button_colour=FFDD00&font_colour=000000&font_family=Inter&outline_colour=000000&coffee_colour=ffffff)](https://buymeacoffee.com/jamesmcginnis)
+
 Turkey Timetable is a Home Assistant integration and Lovelace card for keeping track of a weekly lesson timetable. Designed with an **iPhone-style** look and feel, the card gives you a clean, colour-coded week of lessons with tutors, online meeting details, notes, links and attachments — while the integration turns that timetable into a calendar, lesson sensors and a lesson-starting event for notifications and automations.
 
 The timetable is **shared across the whole household** — everyone sees the same lessons on every device.
@@ -20,6 +24,7 @@ The timetable is **shared across the whole household** — everyone sees the sam
 - **Location, Notes, Links and Attachments** — upload files straight from your device
 - **Export to PDF** — List View or Grid View
 - **Data & Backup** — back up, restore (merge or replace) or reset the timetable
+- **Lesson Join Notifications** — optionally tell chosen Home Assistant users when someone taps a lesson's online link
 - **Notifications** — choose how far ahead to be reminded, from 1 to 60 minutes
 - **Classic or Glass Style** — frosted, translucent Glass with Auto, Light or Dark theme
 - **Colour Presets** — Classic, Ocean, Berry and Graphite, plus custom colours
